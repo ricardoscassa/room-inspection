@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Inspection App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            flex: 1;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* Room Input Page Styles */
+        .room-input-section {
+            margin-bottom: 25px;
+        }
+
+        .room-input-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #555;
+            font-size: 1.1rem;
+        }
+
+        .room-textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        .room-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .help-text {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-height: 50px;
+            touch-action: manipulation;
+        }
+
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .button:active {
+            transform: translateY(0);
+        }
+
+        .button.secondary {
+            background: #6c757d;
+        }
+
+        .button.danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+
+        .button.success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Sequential Check Page Styles */
+        .room-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e1e5e9;
+        }
+
+        .room-title {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .progress-info {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        .checks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .check-item {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .check-item.checked {
+            background: #e8f5e8;
+            border-color: #28a745;
+        }
+
+        .check-label {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .check-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .check-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            background: white;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            touch-action: manipulation;
+        }
+
+        .check-btn.yes {
+            color: #28a745;
+            border-color: #28a745;
+        }
+
+        .check-btn.yes.active {
+            background: #28a745;
+            color: white;
+        }
+
+        .check-btn.no {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .check-btn.no.active {
+            background: #dc3545;
+            color: white;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e1e5e9;
+        }
+
+        .nav-button {
+            padding: 12px 25px;
+            font-size: 1rem;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e1e5e9;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .action-buttons .button {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .checks-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .action-buttons .button {
+                min-width: auto;
+            }
+
+            .navigation {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-button {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .room-title {
+                font-size: 1.5rem;
+            }
+
+            .check-buttons {
+                flex-direction: column;
+            }
+        }
+
+        /* Loading and Success States */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 40px;
+            color: #28a745;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .modal-buttons .button {
+            flex: 1;
+            padding: 12px;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Room Inspection App</h1>
+            <p>Offline room inspection with binary checks</p>
+        </div>
+
+        <!-- Room Input Page -->
+        <div id="roomInputPage" class="page active">
+            <div class="card">
+                <div class="room-input-section">
+                    <label for="roomList">Enter Room Names/Numbers:</label>
+                    <textarea 
+                        id="roomList" 
+                        class="room-textarea" 
+                        placeholder="Enter room names or numbers, one per line:&#10;&#10;Room 101&#10;Room 102&#10;Conference Room A&#10;Storage Room B&#10;..."
+                    ></textarea>
+                    <div class="help-text">
+                        Enter each room name or number on a separate line. You can paste a list from another source.
+                    </div>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="startInspection" class="button">Start Inspection</button>
+                    <button id="loadSavedData" class="button secondary">Load Saved Data</button>
+                    <button id="resetApp" class="button danger">Reset Application</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sequential Check Page -->
+        <div id="checkPage" class="page">
+            <div class="card">
+                <div class="room-header">
+                    <h2 id="currentRoomTitle" class="room-title">Room 101</h2>
+                    <div id="progressInfo" class="progress-info">Room 1 of 5</div>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill" style="width: 20%"></div>
+                    </div>
+                </div>
+
+                <div id="checksContainer" class="checks-grid">
+                    <!-- Check items will be generated by JavaScript -->
+                </div>
+
+                <div class="navigation">
+                    <button id="prevRoom" class="button nav-button secondary">Previous Room</button>
+                    <button id="nextRoom" class="button nav-button">Next Room</button>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="exportExcel" class="button success">Export to Excel</button>
+                    <button id="backToInput" class="button secondary">Back to Input</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completion Page -->
+        <div id="completionPage" class="page">
+            <div class="card">
+                <div class="success-message">
+                    <h2>🎉 Inspection Complete!</h2>
+                    <p>All rooms have been inspected successfully.</p>
+                </div>
+
+                <div class="action-buttons">
+                    <button id="exportExcelComplete" class="button success">Export to Excel</button>
+                    <button id="backToInputComplete" class="button secondary">Start New Inspection</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Confirmation Modal -->
+    <div id="resetModal" class="modal">
+        <div class="modal-content">
+            <h3>Reset Application</h3>
+            <p>This will permanently delete all saved room data and inspection results. Are you sure?</p>
+            <div class="modal-buttons">
+                <button id="confirmReset" class="button danger">Yes, Reset</button>
+                <button id="cancelReset" class="button secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application State
+        let appState = {
+            rooms: [],
+            currentRoomIndex: 0,
+            checkData: {}, // Format: { roomName: [0,1,0,1,...] }
+            isInspectionMode: false
+        };
+
+        // Check questions/labels
+        // Grouped check questions
+const groupedCheckLabels = [
+    { group: 'Is there anyone working in the room?', questions: ['Bylor', 'MEH', 'Other'] },
+    { group: 'What’s installed?', questions: ['Walled in eqpt', 'Other eqpt', 'SSW', 'Supports', 'Pipes', 'Clumps', 'Cable trays', 'Cables', 'CBS'] },
+    { group: 'Support installation status', questions: ['Not started', 'Partially installed', 'Mostly installed', 'Fully installed'] },
+    { group: 'Are there any obstruction present to MEH work?', questions: ['Hydrodem', 'Access egress routes', 'Store eqpt'] },
+    { group: 'Coating', questions: ['Floor', 'Walls', 'In progress'] },
+    { group: 'Comments', questions: ['Comments'] }
+];
+
+// Flatten checkLabels for indexing and export
+const checkLabels = groupedCheckLabels.flatMap(group => group.questions);
+
+        // DOM Elements
+        const roomInputPage = document.getElementById('roomInputPage');
+        const checkPage = document.getElementById('checkPage');
+        const completionPage = document.getElementById('completionPage');
+        const roomListTextarea = document.getElementById('roomList');
+        const currentRoomTitle = document.getElementById('currentRoomTitle');
+        const progressInfo = document.getElementById('progressInfo');
+        const progressFill = document.getElementById('progressFill');
+        const checksContainer = document.getElementById('checksContainer');
+        const resetModal = document.getElementById('resetModal');
+
+        // Initialize the application
+        function initApp() {
+            loadDataFromStorage();
+            setupEventListeners();
+            generateCheckItems();
+            
+            if (appState.isInspectionMode && appState.rooms.length > 0) {
+                showCheckPage();
+                updateCheckPage();
+            } else {
+                showRoomInputPage();
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Room Input Page
+            document.getElementById('startInspection').addEventListener('click', startInspection);
+            document.getElementById('loadSavedData').addEventListener('click', loadSavedData);
+            document.getElementById('resetApp').addEventListener('click', showResetModal);
+
+            // Check Page
+            document.getElementById('prevRoom').addEventListener('click', previousRoom);
+            document.getElementById('nextRoom').addEventListener('click', nextRoom);
+            document.getElementById('exportExcel').addEventListener('click', exportToExcel);
+            document.getElementById('backToInput').addEventListener('click', backToInput);
+
+            // Completion Page
+            document.getElementById('exportExcelComplete').addEventListener('click', exportToExcel);
+            document.getElementById('backToInputComplete').addEventListener('click', backToInput);
+
+            // Reset Modal
+            document.getElementById('confirmReset').addEventListener('click', resetApplication);
+            document.getElementById('cancelReset').addEventListener('click', hideResetModal);
+        }
+
+        // Generate check items HTML
+        function generateCheckItems() {
+    checksContainer.innerHTML = '';
+
+    groupedCheckLabels.forEach((group, groupIndex) => {
+        const groupTitle = document.createElement('h3');
+        groupTitle.textContent = group.group;
+        groupTitle.style.marginTop = '20px';
+        groupTitle.style.color = '#444';
+        checksContainer.appendChild(groupTitle);
+
+        group.questions.forEach((label, index) => {
+            const overallIndex = checkLabels.indexOf(label);
+            const checkItem = document.createElement('div');
+            checkItem.className = 'check-item';
+
+            if (label === 'Comments') {
+                checkItem.innerHTML = `
+                    <div class="check-label">${label}</div>
+                    <textarea class="room-textarea" data-check="${overallIndex}" rows="3" placeholder="Enter comments here..."></textarea>
+                `;
+            } else {
+                checkItem.innerHTML = `
+                    <div class="check-label">${label}</div>
+                    <div class="check-buttons">
+                        <button class="check-btn yes" data-check="${overallIndex}" data-value="1">Yes</button>
+                        <button class="check-btn no" data-check="${overallIndex}" data-value="0">No</button>
+                    </div>
+                `;
+            }
+
+            checksContainer.appendChild(checkItem);
+        });
+    });
+
+    document.querySelectorAll('.check-btn').forEach(btn => {
+        btn.addEventListener('click', handleCheckClick);
+    });
+
+    document.querySelectorAll('textarea[data-check]').forEach(area => {
+        area.addEventListener('input', handleTextInput);
+    });
+});
+
+            saveDataToStorage();
+            showCheckPage();
+            updateCheckPage();
+        }
+
+        // Load saved data
+        function loadSavedData() {
+            if (appState.rooms.length === 0) {
+                alert('No saved data found.');
+                return;
+            }
+
+            appState.isInspectionMode = true;
+            showCheckPage();
+            updateCheckPage();
+        }
+
+        // Show different pages
+        function showRoomInputPage() {
+            roomInputPage.classList.add('active');
+            checkPage.classList.remove('active');
+            completionPage.classList.remove('active');
+        }
+
+        function showCheckPage() {
+            roomInputPage.classList.remove('active');
+            checkPage.classList.add('active');
+            completionPage.classList.remove('active');
+        }
+
+        function showCompletionPage() {
+            roomInputPage.classList.remove('active');
+            checkPage.classList.remove('active');
+            completionPage.classList.add('active');
+        }
+
+        // Update check page content
+        function updateCheckPage() {
+            const currentRoom = appState.rooms[appState.currentRoomIndex];
+            const totalRooms = appState.rooms.length;
+            const progress = ((appState.currentRoomIndex + 1) / totalRooms) * 100;
+
+            // Update header
+            currentRoomTitle.textContent = currentRoom;
+            progressInfo.textContent = `Room ${appState.currentRoomIndex + 1} of ${totalRooms}`;
+            progressFill.style.width = `${progress}%`;
+
+            // Update navigation buttons
+            document.getElementById('prevRoom').disabled = appState.currentRoomIndex === 0;
+            
+            const nextBtn = document.getElementById('nextRoom');
+            if (appState.currentRoomIndex === totalRooms - 1) {
+                nextBtn.textContent = 'Complete Inspection';
+            } else {
+                nextBtn.textContent = 'Next Room';
+            }
+
+            // Update check states
+            updateCheckStates();
+        }
+
+        // Update check button states
+        function updateCheckStates() {
+            const currentRoom = appState.rooms[appState.currentRoomIndex];
+            const roomData = appState.checkData[currentRoom] || new Array(checkLabels.length).fill(null);
+
+            document.querySelectorAll('.check-item').forEach((item, index) => {
+                const buttons = item.querySelectorAll('.check-btn');
+                const value = roomData[index];
+
+                // Reset states
+                buttons.forEach(btn => btn.classList.remove('active'));
+                item.classList.remove('checked');
+
+                // Set active state if value exists
+                if (value !== null) {
+                    const activeBtn = item.querySelector(`[data-value="${value}"]`);
+                    if (activeBtn) {
+                        activeBtn.classList.add('active');
+                        item.classList.add('checked');
+                    }
+                }
+            });
+        }
+
+        // Navigation functions
+        function previousRoom() {
+            if (appState.currentRoomIndex > 0) {
+                appState.currentRoomIndex--;
+                updateCheckPage();
+                saveDataToStorage();
+            }
+        }
+
+        function nextRoom() {
+            if (appState.currentRoomIndex < appState.rooms.length - 1) {
+                appState.currentRoomIndex++;
+                updateCheckPage();
+                saveDataToStorage();
+            } else {
+                // Complete inspection
+                showCompletionPage();
+                appState.isInspectionMode = false;
+                saveDataToStorage();
+            }
+        }
+
+        // Back to input
+        function backToInput() {
+            appState.isInspectionMode = false;
+            appState.currentRoomIndex = 0;
+            roomListTextarea.value = appState.rooms.join('\n');
+            saveDataToStorage();
+            showRoomInputPage();
+        }
+
+        // Reset modal functions
+        function showResetModal() {
+            resetModal.classList.add('active');
+        }
+
+        function hideResetModal() {
+            resetModal.classList.remove('active');
+        }
+
+        // Reset application
+        function resetApplication() {
+            appState = {
+                rooms: [],
+                currentRoomIndex: 0,
+                checkData: {},
+                isInspectionMode: false
+            };
+            
+            roomListTextarea.value = '';
+            localStorage.removeItem('roomInspectionApp');
+            hideResetModal();
+            showRoomInputPage();
+        }
+
+        // Local Storage functions
+        function saveDataToStorage() {
+            try {
+                localStorage.setItem('roomInspectionApp', JSON.stringify(appState));
+            } catch (error) {
+                console.error('Failed to save data to localStorage:', error);
+            }
+        }
+
+        function loadDataFromStorage() {
+            try {
+                const savedData = localStorage.getItem('roomInspectionApp');
+                if (savedData) {
+                    const parsedData = JSON.parse(savedData);
+                    appState = { ...appState, ...parsedData };
+                    
+                    // Update UI with saved room list
+                    if (appState.rooms.length > 0) {
+                        roomListTextarea.value = appState.rooms.join('\n');
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load data from localStorage:', error);
+            }
+        }
+
+        // Excel export utility functions
+        function s2ab(s) {
+            const buf = new ArrayBuffer(s.length);
+            const view = new Uint8Array(buf);
+            for (let i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
+            return buf;
+        }
+
+        function createWorkbook() {
+            return {
+                SheetNames: [],
+                Sheets: {}
+            };
+        }
+
+        function addWorksheet(wb, data, name) {
+            const ws = {};
+            const range = { s: { c: 10000000, r: 10000000 }, e: { c: 0, r: 0 } };
+            
+            for (let R = 0; R < data.length; ++R) {
+                for (let C = 0; C < data[R].length; ++C) {
+                    if (range.s.r > R) range.s.r = R;
+                    if (range.s.c > C) range.s.c = C;
+                    if (range.e.r < R) range.e.r = R;
+                    if (range.e.c < C) range.e.c = C;
+                    
+                    const cell = { v: data[R][C] };
+                    if (cell.v == null) continue;
+                    
+                    const cell_ref = encodeCell({ c: C, r: R });
+                    
+                    if (typeof cell.v === 'number') cell.t = 'n';
+                    else if (typeof cell.v === 'boolean') cell.t = 'b';
+                    else if (cell.v instanceof Date) {
+                        cell.t = 'n';
+                        cell.z = 'm/d/yy';
+                        cell.v = dateToSerial(cell.v);
+                    } else cell.t = 's';
+                    
+                    ws[cell_ref] = cell;
+                }
+            }
+            
+            if (range.s.c < 10000000) ws['!ref'] = encodeRange(range);
+            wb.SheetNames.push(name);
+            wb.Sheets[name] = ws;
+        }
+
+        function encodeCell(cell) {
+            return encodeCol(cell.c) + encodeRow(cell.r);
+        }
+
+        function encodeCol(col) {
+            let s = '';
+            for (++col; col; col = Math.floor((col - 1) / 26)) {
+                s = String.fromCharCode(((col - 1) % 26) + 65) + s;
+            }
+            return s;
+        }
+
+        function encodeRow(row) {
+            return '' + (row + 1);
+        }
+
+        function encodeRange(range) {
+            return encodeCell(range.s) + ':' + encodeCell(range.e);
+        }
+
+        function dateToSerial(date) {
+            return (date.getTime() - new Date(1900, 0, 1).getTime()) / (24 * 60 * 60 * 1000) + 1;
+        }
+
+        function writeWorkbook(wb) {
+            const wbout = [
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+                '<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">',
+                '<sheets>'
+            ];
+            
+            wb.SheetNames.forEach((name, i) => {
+                wbout.push(`<sheet name="${name}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`);
+            });
+            
+            wbout.push('</sheets></workbook>');
+            return wbout.join('');
+        }
+
+        function writeWorksheet(ws) {
+            const rows = [];
+            const range = ws['!ref'] ? decodeRange(ws['!ref']) : { s: { c: 0, r: 0 }, e: { c: 0, r: 0 } };
+            
+            for (let R = range.s.r; R <= range.e.r; ++R) {
+                const row = [];
+                for (let C = range.s.c; C <= range.e.c; ++C) {
+                    const cell_ref = encodeCell({ c: C, r: R });
+                    const cell = ws[cell_ref];
+                    row.push(cell ? `<c r="${cell_ref}" t="${cell.t}"><v>${cell.v}</v></c>` : '<c/>');
+                }
+                rows.push(`<row r="${R + 1}">${row.join('')}</row>`);
+            }
+            
+            return [
+                '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>',
+                '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">',
+                '<sheetData>',
+                rows.join(''),
+                '</sheetData>',
+                '</worksheet>'
+            ].join('');
+        }
+
+        function decodeRange(range) {
+            const parts = range.split(':');
+            return {
+                s: decodeCell(parts[0]),
+                e: decodeCell(parts[1] || parts[0])
+            };
+        }
+
+        function decodeCell(cell) {
+            const match = cell.match(/^([A-Z]+)(\d+)$/);
+            return {
+                c: decodeCol(match[1]),
+                r: parseInt(match[2]) - 1
+            };
+        }
+
+        function decodeCol(col) {
+            let result = 0;
+            for (let i = 0; i < col.length; i++) {
+                result = result * 26 + (col.charCodeAt(i) - 64);
+            }
+            return result - 1;
+        }
+
+        // Export to Excel function
+        function exportToExcel() {
+            if (appState.rooms.length === 0) {
+                alert('No room data to export.');
+                return;
+            }
+
+            try {
+                // Prepare data for Excel
+                const data = [];
+                
+                // Header row
+                const headers = ['Room Name/Number'].concat(checkLabels);
+                for (let i = 1; i <= 15; i++) {
+                    headers.push(`Check ${i}`);
+                }
+                data.push(headers);
+
+                // Data rows
+                appState.rooms.forEach(room => {
+                    const row = [room];
+                    const roomData = appState.checkData[room] || new Array(checkLabels.length).fill(null);
+                    
+                    roomData.forEach(value => {
+                        row.push(value !== null ? value : '');
+                    });
+                    data.push(row);
+                });
+
+                // For simplicity and better compatibility, export as CSV
+                // which can be opened by Excel and other spreadsheet applications
+                let csvContent = '';
+                data.forEach(row => {
+                    const csvRow = row.map(cell => {
+                        // Escape quotes and wrap in quotes if necessary
+                        const cellStr = String(cell);
+                        if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+                            return `"${cellStr.replace(/"/g, '""')}"`;
+                        }
+                        return cellStr;
+                    }).join(',');
+                    csvContent += csvRow + '\n';
+                });
+
+                // Create and download the file
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                
+                if (link.download !== undefined) {
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', `room_inspection_${new Date().toISOString().split('T')[0]}.csv`);
+                    link.style.visibility = 'hidden';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    
+                    // Show success message
+                    alert('Data exported successfully! The file can be opened in Excel or any spreadsheet application.');
+                } else {
+                    alert('Your browser does not support file downloads.');
+                }
+            } catch (error) {
+                console.error('Export failed:', error);
+                alert('Failed to export data. Please try again.');
+            }
+        }
+
+        // Initialize the application when DOM is loaded
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
+
