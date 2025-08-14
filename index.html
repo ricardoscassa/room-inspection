@@ -432,7 +432,7 @@
         <div id="completionPage" class="page">
             <div class="card">
                 <div class="success-message">
-                    <h2>🎉 Inspection Complete!</h2>
+                    <h2>Inspection Complete!</h2>
                     <p>All rooms have been inspected successfully.</p>
                 </div>
 
@@ -721,6 +721,7 @@
                 appState.currentRoomIndex--;
                 updateCheckPage();
                 saveDataToStorage();
+                window.scrollTo(0, 0); // Scroll to top
             }
         }
 
@@ -729,6 +730,7 @@
                 appState.currentRoomIndex++;
                 updateCheckPage();
                 saveDataToStorage();
+                window.scrollTo(0, 0); // Scroll to top
             } else {
                 // Complete inspection
                 showCompletionPage();
@@ -943,7 +945,7 @@
                 const data = [];
                 
                 // Header row
-                const headers = ['Room Name/Number'];
+                const headers = ['Room'];
                 checkLabels.forEach(label => headers.push(label));
                 data.push(headers);
 
