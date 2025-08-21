@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Inspection App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 900px; /* Increased max-width for better layout */
+            margin: 0 auto;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            flex: 1;
+        }
+        
+        .page {
+            display: none;
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        /* Main Menu Styles */
+        .menu-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .menu-button {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-align: center;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .menu-button.primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .menu-button.secondary {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+        }
+        
+        .menu-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        
+        /* Room Input Page Styles */
+        .room-input-section {
+            margin-bottom: 25px;
+        }
+        
+        .room-input-section label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #555;
+            font-size: 1.1rem;
+        }
+        
+        .room-textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+        
+        .room-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .help-text {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        
+        .button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            min-height: 50px;
+            touch-action: manipulation;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .button.secondary {
+            background: #6c757d;
+        }
+        
+        .button.danger {
+            background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        }
+        
+        .button.success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        
+        .button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        /* Sequential Check Page Styles */
+        .room-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e1e5e9;
+        }
+
+        .room-title {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .checks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .check-item {
+            background: #f8f9fa;
+            border: 2px solid #e1e5e9;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .check-item.checked {
+            background: #e8f5e8;
+            border-color: #28a745;
+        }
+
+        .check-label {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            font-size: 1rem;
+        }
+
+        .check-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .check-btn {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            background: white;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            touch-action: manipulation;
+        }
+
+        .check-btn.yes {
+            color: #28a745;
+            border-color: #28a745;
+        }
+
+        .check-btn.yes.active {
+            background: #28a745;
+            color: white;
+        }
+
+        .check-btn.no {
+            color: #dc3545;
+            border-color: #dc3545;
+        }
+
+        .check-btn.no.active {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* Code Check Page Styles */
+        .code-header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #e1e5e9;
+        }
+        
+        .code-title {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 10px;
+            word-break: break-all;
+        }
+        
+        .progress-info {
+            color: #666;
+            font-size: 1rem;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e1e5e9;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+        
+        .code-inspection-grid {
+            display: grid;
+            grid-template-columns: 1fr 150px 250px; /* Code | Status Button | Comment */
+            gap: 10px;
+            margin-bottom: 30px;
+            border: 1px solid #e1e5e9;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .grid-header {
+            font-weight: 700;
+            background-color: #f0f2f5;
+            padding: 10px;
+            border-bottom: 1px solid #e1e5e9;
+            text-align: center;
+        }
+
+        .grid-row {
+            display: contents; /* Allows children to be placed directly in grid */
+        }
+
+        .grid-cell {
+            padding: 10px;
+            border-bottom: 1px solid #e1e5e9;
+            display: flex;
+            align-items: center;
+            word-break: break-all;
+        }
+
+        .grid-cell:nth-child(3n+1) { /* Code column */
+            background-color: #fdfdfd;
+        }
+
+        .grid-cell:nth-child(3n+2) { /* Status button column */
+            background-color: #f8f8f8;
+            justify-content: center;
+        }
+
+        .grid-cell:nth-child(3n) { /* Comment column */
+            background-color: #fdfdfd;
+        }
+
+        .grid-row:last-child .grid-cell {
+            border-bottom: none; /* Remove bottom border for last row */
+        }
+
+        .status-button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+
+        .status-button:hover {
+            background: #5a6cdb;
+        }
+
+        .status-button.selected {
+            background: #28a745;
+        }
+
+        .status-options {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10;
+            display: none;
+            flex-direction: column;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .status-options.active {
+            display: flex;
+        }
+
+        .status-option {
+            padding: 10px 15px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .status-option:hover {
+            background-color: #f0f0f0;
+        }
+
+        .comment-textarea {
+            width: 100%;
+            min-height: 38px; /* Adjusted for single line */
+            padding: 8px;
+            border: 1px solid #e1e5e9;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e1e5e9;
+        }
+        
+        .nav-button {
+            padding: 12px 25px;
+            font-size: 1rem;
+        }
+        
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .action-buttons .button {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        /* Success States */
+        .success-message {
+            text-align: center;
+            padding: 40px;
+            color: #28a745;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .modal-buttons .button {
+            flex: 1;
+            padding: 12px;
+            font-size: 1rem;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .code-inspection-grid {
+                grid-template-columns: 1fr; /* Stack columns on small screens */
+            }
+            .grid-header, .grid-cell {
+                text-align: left;
+                justify-content: flex-start;
+            }
+            .grid-cell:nth-child(3n+1), .grid-cell:nth-child(3n+2), .grid-cell:nth-child(3n) {
+                background-color: #fdfdfd; /* Uniform background */
+            }
+            .status-button {
+                max-width: none;
+            }
+            .status-options {
+                position: relative; /* Adjust for mobile */
+                width: 100%;
+            }
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .action-buttons .button {
+                min-width: auto;
+            }
+            
+            .navigation {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .nav-button {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .code-title {
+                font-size: 1.3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Room Inspection App V1.2</h1>
+            <p>Comprehensive room and code inspection system</p>
+        </div>
+
+        <!-- Main Menu Page -->
+        <div id="mainMenuPage" class="page active">
+            <div class="card">
+                <h2 style="text-align: center; margin-bottom: 30px; color: #333;">Choose Inspection Type</h2>
+                <div class="menu-buttons">
+                    <button id="siteInspectionBtn" class="menu-button primary">
+                        EA - Inspection
+                        <div style="font-size: 0.9rem; font-weight: normal; margin-top: 5px; opacity: 0.8;">
+                            ROOM-BY-ROOM INSPECTION
+                        </div>
+                    </button>
+                    <button id="codeInspectionBtn" class="menu-button secondary">
+                        ECS INSPECTION
+                        <div style="font-size: 0.9rem; font-weight: normal; margin-top: 5px; opacity: 0.8;">
+                            Room codes with detailed checks
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Room Input Page (Original) -->
+        <div id="roomInputPage" class="page">
+            <div class="card">
+                <div class="room-input-section">
+                    <label for="roomList">Enter Room Names/Numbers:</label>
+                    <textarea
+                        id="roomList"
+                        class="room-textarea"
+                        placeholder="Enter room names, one per line:"
+                    ></textarea>
+                    <div class="help-text">
+                        Enter each room name or number on a separate line. You can paste a list from another source.
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button id="startInspection" class="button">Start Inspection</button>
+                    <button id="loadSavedData" class="button secondary">Load Saved Data</button>
+                    <button id="resetApp" class="button danger">Reset Application</button>
+                    <button id="backToMainMenu" class="button secondary">Back to Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Code Input Page (New) -->
+        <div id="codeInputPage" class="page">
+            <div class="card">
+                <div class="room-input-section">
+                    <label for="codeList">Enter Room Codes:</label>
+                    <textarea
+                        id="codeList"
+                        class="room-textarea"
+                        placeholder="Enter room codes in the format:
+Room Codes (Room- Codes)
+1H.....- 1HL.......
+1L.....- 1HL.......
+1HL.........
+1LH......... 
+..."
+                    ></textarea>
+                    <div class="help-text">
+                        Enter room codes with their associated codes. Use the format shown above. Each line can contain a room code followed by its associated codes, or just individual codes.
+                    </div>
+                </div>
+                <div class="action-buttons">
+                    <button id="startCodeInspection" class="button">Start Code Inspection</button>
+                    <button id="loadSavedCodeData" class="button secondary">Load Saved Data</button>
+                    <button id="resetCodeApp" class="button danger">Reset Application</button>
+                    <button id="backToMainMenuFromCode" class="button secondary">Back to Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Check Page (Original) -->
+        <div id="checkPage" class="page">
+            <div class="card">
+                <div class="room-header">
+                    <h2 id="currentRoomTitle" class="room-title">Room 101</h2>
+                    <div id="progressInfo" class="progress-info">Room 1 of 5</div>
+                    <div class="progress-bar">
+                        <div id="progressFill" class="progress-fill" style="width: 20%"></div>
+                    </div>
+                </div>
+                <div id="checksContainer" class="checks-grid">
+                </div>
+                <div class="navigation">
+                    <button id="prevRoom" class="button nav-button secondary">Previous Room</button>
+                    <button id="nextRoom" class="button nav-button">Next Room</button>
+                </div>
+                <div class="action-buttons">
+                    <button id="exportExcel" class="button success">Export to Excel</button>
+                    <button id="backToInput" class="button secondary">Back to Input</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Code Check Page (New) -->
+        <div id="codeCheckPage" class="page">
+            <div class="card">
+                <div class="code-header">
+                    <h2 id="currentCodeRoomTitle" class="room-title">Room: 1HLF0104ZL</h2>
+                    <div id="codeProgressInfo" class="progress-info">Room 1 of 5</div>
+                    <div class="progress-bar">
+                        <div id="codeProgressFill" class="progress-fill" style="width: 20%"></div>
+                    </div>
+                </div>
+                <div id="codeChecksContainer" class="code-inspection-grid">
+                    <!-- Headers -->
+                    <div class="grid-header">Code</div>
+                    <div class="grid-header">Status</div>
+                    <div class="grid-header">Comment</div>
+                    <!-- Code rows will be inserted here by JavaScript -->
+                </div>
+                <div class="navigation">
+                    <button id="prevCodeRoom" class="button nav-button secondary">Previous Room</button>
+                    <button id="nextCodeRoom" class="button nav-button">Next Room</button>
+                </div>
+                <div class="action-buttons">
+                    <button id="exportCodeExcel" class="button success">Export to Excel</button>
+                    <button id="backToCodeInput" class="button secondary">Back to Input</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Completion Page -->
+        <div id="completionPage" class="page">
+            <div class="card">
+                <div class="success-message">
+                    <h2>Inspection Complete!</h2>
+                    <p>All items have been inspected successfully.</p>
+                </div>
+                <div class="action-buttons">
+                    <button id="exportExcelComplete" class="button success">Export to Excel</button>
+                    <button id="backToMainMenuComplete" class="button secondary">Back to Main Menu</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reset Modal -->
+        <div id="resetModal" class="modal">
+            <div class="modal-content">
+                <h3>Reset Application</h3>
+                <p>This will permanently delete all saved data and inspection results. Are you sure?</p>
+                <div class="modal-buttons">
+                    <button id="confirmReset" class="button danger">Yes, Reset</button>
+                    <button id="cancelReset" class="button secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script>
+        // Application State
+        let appState = {
+            mode: 'site', // 'site' or 'code'
+            rooms: [], // For site inspection: list of room names
+            roomCodes: {}, // For code inspection: { 'roomName': ['code1', 'code2', ...] }
+            currentRoomIndex: 0, // Index for rooms in site inspection
+            currentCodeRoomIndex: 0, // Index for rooms in code inspection
+            checkData: {}, // Format: { 'roomName' or 'room-code': statusIndex (for code) or value (for site) }
+            codeSpecificComments: {}, // Format: { 'room-code': 'comment' }
+            isInspectionMode: false
+        };
+
+        // Pre-loadable status options for code inspection
+        const codeStatusOptions = [
+            'Available',
+            'No Access',
+            'Protective Covering',
+            'Installed',
+            'PIA Required',
+            'TCO',
+            'CBS blocking  Installation ',
+            'Equipment Blocking Install',
+            'Not Verified ',
+            'Material Blocking',
+            'Not Installed',
+            'Material Blocking Plate',
+            'Unavailable '
+        ];
+
+        // Check questions/labels for site inspection (from original PDF)
+        const groupedCheckLabels = [
+            { group: 'Is there anyone working in the room?', questions: ['Bylor', 'MEH', 'Other'] },
+            { group: 'What\'s installed?', questions: ['Walled in eqpt', 'Other eqpt', 'SSW', 'Supports', 'Pipes', 'Clumps', 'Cable trays', 'Cables', 'CBS'] },
+            { group: 'Support installation status', questions: ['Not started', 'Partially installed', 'Mostly installed', 'Fully installed'] },
+            { group: 'Are there any obstruction present to MEH work?', questions: ['Hydrodem', 'Access egress routes', 'Stored eqpt'] },
+            { group: 'Coating', questions: ['Floor', 'Walls', 'In progress'] },
+            { group: 'Comments', questions: ['Comments'] }
+        ];
+        const checkLabels = groupedCheckLabels.flatMap(group => group.questions);
+
+        // DOM Elements
+        const mainMenuPage = document.getElementById('mainMenuPage');
+        const roomInputPage = document.getElementById('roomInputPage');
+        const codeInputPage = document.getElementById('codeInputPage');
+        const checkPage = document.getElementById('checkPage');
+        const codeCheckPage = document.getElementById('codeCheckPage');
+        const completionPage = document.getElementById('completionPage');
+        const resetModal = document.getElementById('resetModal');
+
+        // Initialize the application
+        function initApp() {
+            loadDataFromStorage();
+            setupEventListeners();
+            
+            if (appState.isInspectionMode) {
+                if (appState.mode === 'site' && appState.rooms.length > 0) {
+                    generateCheckItems();
+                    showCheckPage();
+                    updateCheckPage();
+                } else if (appState.mode === 'code' && Object.keys(appState.roomCodes).length > 0) {
+                    generateCodeCheckItems();
+                    showCodeCheckPage();
+                    updateCodeCheckPage();
+                } else {
+                    showMainMenuPage();
+                }
+            } else {
+                showMainMenuPage();
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Main Menu
+            document.getElementById('siteInspectionBtn').addEventListener('click', () => {
+                appState.mode = 'site';
+                showRoomInputPage();
+            });
+            
+            document.getElementById('codeInspectionBtn').addEventListener('click', () => {
+                appState.mode = 'code';
+                showCodeInputPage();
+            });
+
+            // Room Input Page
+            document.getElementById('startInspection').addEventListener('click', startInspection);
+            document.getElementById('loadSavedData').addEventListener('click', loadSavedData);
+            document.getElementById('resetApp').addEventListener('click', showResetModal);
+            document.getElementById('backToMainMenu').addEventListener('click', showMainMenuPage);
+
+            // Code Input Page
+            document.getElementById('startCodeInspection').addEventListener('click', startCodeInspection);
+            document.getElementById('loadSavedCodeData').addEventListener('click', loadSavedCodeData);
+            document.getElementById('resetCodeApp').addEventListener('click', showResetModal);
+            document.getElementById('backToMainMenuFromCode').addEventListener('click', showMainMenuPage);
+
+            // Check Page
+            document.getElementById('prevRoom').addEventListener('click', previousRoom);
+            document.getElementById('nextRoom').addEventListener('click', nextRoom);
+            document.getElementById('exportExcel').addEventListener('click', exportToExcel);
+            document.getElementById('backToInput').addEventListener('click', backToInput);
+
+            // Code Check Page
+            document.getElementById('prevCodeRoom').addEventListener('click', previousCodeRoom);
+            document.getElementById('nextCodeRoom').addEventListener('click', nextCodeRoom);
+            document.getElementById('exportCodeExcel').addEventListener('click', exportCodeToExcel);
+            document.getElementById('backToCodeInput').addEventListener('click', backToCodeInput);
+
+            // Completion Page
+            document.getElementById('exportExcelComplete').addEventListener('click', () => {
+                if (appState.mode === 'site') {
+                    exportToExcel();
+                } else {
+                    exportCodeToExcel();
+                }
+            });
+            document.getElementById('backToMainMenuComplete').addEventListener('click', showMainMenuPage);
+
+            // Reset Modal
+            document.getElementById('confirmReset').addEventListener('click', resetApplication);
+            document.getElementById('cancelReset').addEventListener('click', hideResetModal);
+
+            // Close status options when clicking outside
+            document.addEventListener('click', (event) => {
+                if (!event.target.closest('.status-button') && !event.target.closest('.status-options')) {
+                    document.querySelectorAll('.status-options.active').forEach(options => {
+                        options.classList.remove('active');
+                    });
+                }
+            });
+        }
+
+        // Parse room codes input
+        function parseRoomCodesInput(input) {
+            const lines = input.split('\n').map(line => line.trim()).filter(line => line !== '');
+            const roomCodesMap = {};
+            let currentRoom = null;
+
+            for (const line of lines) {
+                if (line.includes('-')) {
+                    const parts = line.split('-');
+                    if (parts.length >= 2) {
+                        currentRoom = parts[0].trim();
+                        const codes = parts.slice(1).map(code => code.trim()).filter(code => code !== '');
+                        roomCodesMap[currentRoom] = codes;
+                    }
+                } else if (currentRoom) {
+                    // If there's a current room, add subsequent lines as codes to that room
+                    if (roomCodesMap[currentRoom]) {
+                        roomCodesMap[currentRoom].push(line);
+                    } else {
+                        roomCodesMap[currentRoom] = [line];
+                    }
+                }
+            }
+            return roomCodesMap;
+        }
+
+        // Start site inspection
+        function startInspection() {
+            const roomList = document.getElementById('roomList').value.split('\n')
+                .map(room => room.trim())
+                .filter(room => room !== '');
+
+            if (roomList.length === 0) {
+                alert('Please enter at least one room name or number.');
+                return;
+            }
+
+            appState.rooms = roomList;
+            appState.currentRoomIndex = 0;
+            appState.checkData = {};
+            appState.isInspectionMode = true;
+            appState.mode = 'site';
+
+            // Initialize check data for each room
+            appState.rooms.forEach(room => {
+                appState.checkData[room] = new Array(checkLabels.length).fill(null);
+            });
+
+            saveDataToStorage();
+            generateCheckItems();
+            showCheckPage();
+            updateCheckPage();
+        }
+
+        // Start code inspection
+        function startCodeInspection() {
+            const codeInput = document.getElementById('codeList').value;
+            const parsedRoomCodes = parseRoomCodesInput(codeInput);
+
+            if (Object.keys(parsedRoomCodes).length === 0) {
+                alert('Please enter at least one room with codes.');
+                return;
+            }
+
+            appState.roomCodes = parsedRoomCodes;
+            appState.currentCodeRoomIndex = 0;
+            appState.checkData = {}; // This will store status for each code: { 'room-code': statusIndex }
+            appState.codeSpecificComments = {}; // { 'room-code': 'comment' }
+            appState.isInspectionMode = true;
+            appState.mode = 'code';
+
+            // Initialize check data and comments for each room's codes
+            for (const room in appState.roomCodes) {
+                appState.roomCodes[room].forEach(code => {
+                    const uniqueCodeId = `${room}-${code}`;
+                    appState.checkData[uniqueCodeId] = null; // Store index of selected status
+                    appState.codeSpecificComments[uniqueCodeId] = '';
+                });
+            }
+
+            saveDataToStorage();
+            generateCodeCheckItems();
+            showCodeCheckPage();
+            updateCodeCheckPage();
+        }
+
+        // Generate check items for site inspection
+        function generateCheckItems() {
+            const checksContainer = document.getElementById('checksContainer');
+            checksContainer.innerHTML = '';
+            
+            groupedCheckLabels.forEach(group => {
+                const groupHeader = document.createElement('h3');
+                groupHeader.textContent = group.group;
+                groupHeader.style.gridColumn = '1 / -1';
+                groupHeader.style.color = '#333';
+                checksContainer.appendChild(groupHeader);
+
+                group.questions.forEach((label) => {
+                    const checkIndex = checkLabels.indexOf(label);
+                    const checkItem = document.createElement('div');
+                    checkItem.className = 'check-item';
+
+                    if (label === 'Comments') {
+                        checkItem.innerHTML = `
+                            <div class="check-label">${label}</div>
+                            <textarea class="room-textarea" data-check="${checkIndex}" rows="3" placeholder="Add comments..."></textarea>
+                        `;
+                    } else {
+                        checkItem.innerHTML = `
+                            <div class="check-label">${label}</div>
+                            <div class="check-buttons">
+                                <button class="check-btn yes" data-check="${checkIndex}" data-value="1">Yes</button>
+                                <button class="check-btn no" data-check="${checkIndex}" data-value="0">No</button>
+                            </div>
+                        `;
+                    }
+
+                    checksContainer.appendChild(checkItem);
+                });
+            });
+
+            // Add event listeners
+            document.querySelectorAll('#checksContainer .check-btn').forEach(btn => {
+                btn.addEventListener('click', handleCheckClick);
+            });
+
+            document.querySelectorAll('#checksContainer textarea[data-check]').forEach(area => {
+                area.addEventListener('input', handleTextInput);
+            });
+        }
+
+        // Generate check items for code inspection (Excel-like layout)
+        function generateCodeCheckItems() {
+            const checksContainer = document.getElementById('codeChecksContainer');
+            // Clear only rows, keep headers
+            checksContainer.querySelectorAll('.grid-row').forEach(row => row.remove());
+
+            const currentRoomName = Object.keys(appState.roomCodes)[appState.currentCodeRoomIndex];
+            const codesForCurrentRoom = appState.roomCodes[currentRoomName] || [];
+
+            codesForCurrentRoom.forEach((code) => {
+                const uniqueCodeId = `${currentRoomName}-${code}`;
+
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'grid-row';
+
+                // Code Cell
+                const codeCell = document.createElement('div');
+                codeCell.className = 'grid-cell';
+                codeCell.textContent = code;
+                rowDiv.appendChild(codeCell);
+
+                // Status Button Cell
+                const statusCell = document.createElement('div');
+                statusCell.className = 'grid-cell';
+                const statusButton = document.createElement('button');
+                statusButton.className = 'status-button';
+                statusButton.textContent = 'Select Status';
+                statusButton.dataset.codeId = uniqueCodeId;
+                statusButton.addEventListener('click', toggleStatusOptions);
+                statusCell.appendChild(statusButton);
+
+                const statusOptionsDiv = document.createElement('div');
+                statusOptionsDiv.className = 'status-options';
+                statusOptionsDiv.dataset.codeId = uniqueCodeId;
+                codeStatusOptions.forEach((option, optionIndex) => {
+                    const optionDiv = document.createElement('div');
+                    optionDiv.className = 'status-option';
+                    optionDiv.textContent = option;
+                    optionDiv.dataset.codeId = uniqueCodeId;
+                    optionDiv.dataset.statusIndex = optionIndex;
+                    optionDiv.addEventListener('click', selectCodeStatus);
+                    statusOptionsDiv.appendChild(optionDiv);
+                });
+                statusCell.appendChild(statusOptionsDiv);
+                rowDiv.appendChild(statusCell);
+
+                // Comment Cell
+                const commentCell = document.createElement('div');
+                commentCell.className = 'grid-cell';
+                const commentTextarea = document.createElement('textarea');
+                commentTextarea.className = 'comment-textarea';
+                commentTextarea.placeholder = 'Add comment...';
+                commentTextarea.dataset.codeId = uniqueCodeId;
+                commentTextarea.addEventListener('input', handleCodeCommentInput);
+                commentCell.appendChild(commentTextarea);
+                rowDiv.appendChild(commentCell);
+
+                checksContainer.appendChild(rowDiv);
+            });
+        }
+
+        // Handle check button clicks for site inspection
+        function handleCheckClick(event) {
+            const btn = event.target;
+            const checkIndex = parseInt(btn.dataset.check);
+            const value = parseInt(btn.dataset.value);
+            const currentRoom = appState.rooms[appState.currentRoomIndex];
+
+            if (!appState.checkData[currentRoom]) {
+                appState.checkData[currentRoom] = new Array(checkLabels.length).fill(null);
+            }
+
+            // Toggle the value if the same button is clicked again
+            if (appState.checkData[currentRoom][checkIndex] === value) {
+                appState.checkData[currentRoom][checkIndex] = null;
+            } else {
+                appState.checkData[currentRoom][checkIndex] = value;
+            }
+
+            updateCheckStates();
+            saveDataToStorage();
+        }
+
+        // Toggle status options dropdown
+        function toggleStatusOptions(event) {
+            const button = event.target;
+            const uniqueCodeId = button.dataset.codeId;
+            const statusOptions = document.querySelector(`.status-options[data-code-id="${uniqueCodeId}"]`);
+
+            // Close any other open dropdowns
+            document.querySelectorAll('.status-options.active').forEach(options => {
+                if (options !== statusOptions) {
+                    options.classList.remove('active');
+                }
+            });
+
+            statusOptions.classList.toggle('active');
+        }
+
+        // Select code status from dropdown
+        function selectCodeStatus(event) {
+            const option = event.target;
+            const uniqueCodeId = option.dataset.codeId;
+            const statusIndex = parseInt(option.dataset.statusIndex);
+
+            appState.checkData[uniqueCodeId] = statusIndex;
+            saveDataToStorage();
+            updateCodeCheckStates();
+
+            // Close the dropdown after selection
+            document.querySelector(`.status-options[data-code-id="${uniqueCodeId}"]`).classList.remove('active');
+        }
+
+        // Handle text input for site inspection
+        function handleTextInput(event) {
+            const textarea = event.target;
+            const checkIndex = parseInt(textarea.dataset.check);
+            const currentRoom = appState.rooms[appState.currentRoomIndex];
+
+            if (!appState.checkData[currentRoom]) {
+                appState.checkData[currentRoom] = new Array(checkLabels.length).fill(null);
+            }
+
+            appState.checkData[currentRoom][checkIndex] = textarea.value;
+            saveDataToStorage();
+        }
+
+        // Handle comment input for code inspection
+        function handleCodeCommentInput(event) {
+            const textarea = event.target;
+            const uniqueCodeId = textarea.dataset.codeId;
+            appState.codeSpecificComments[uniqueCodeId] = textarea.value;
+            saveDataToStorage();
+        }
+
+        // Navigation functions for site inspection
+        function previousRoom() {
+            if (appState.currentRoomIndex > 0) {
+                appState.currentRoomIndex--;
+                updateCheckPage();
+                updateCheckStates();
+            }
+        }
+
+        function nextRoom() {
+            if (appState.currentRoomIndex < appState.rooms.length - 1) {
+                appState.currentRoomIndex++;
+                updateCheckPage();
+                updateCheckStates();
+            } else {
+                showCompletionPage();
+            }
+        }
+
+        // Navigation functions for code inspection
+        function previousCodeRoom() {
+            if (appState.currentCodeRoomIndex > 0) {
+                appState.currentCodeRoomIndex--;
+                generateCodeCheckItems(); // Regenerate items for new room
+                updateCodeCheckPage();
+                updateCodeCheckStates();
+            }
+        }
+
+        function nextCodeRoom() {
+            if (appState.currentCodeRoomIndex < Object.keys(appState.roomCodes).length - 1) {
+                appState.currentCodeRoomIndex++;
+                generateCodeCheckItems(); // Regenerate items for new room
+                updateCodeCheckPage();
+                updateCodeCheckStates();
+            } else {
+                showCompletionPage();
+            }
+        }
+
+        // Update check page content for site inspection
+        function updateCheckPage() {
+            const currentRoom = appState.rooms[appState.currentRoomIndex];
+            const totalRooms = appState.rooms.length;
+            const progress = ((appState.currentRoomIndex + 1) / totalRooms) * 100;
+
+            document.getElementById('currentRoomTitle').textContent = currentRoom;
+            document.getElementById('progressInfo').textContent = `Room ${appState.currentRoomIndex + 1} of ${totalRooms}`;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+
+            document.getElementById('prevRoom').disabled = appState.currentRoomIndex === 0;
+            const nextBtn = document.getElementById('nextRoom');
+            if (appState.currentRoomIndex === totalRooms - 1) {
+                nextBtn.textContent = 'Complete Inspection';
+            } else {
+                nextBtn.textContent = 'Next Room';
+            }
+        }
+
+        // Update code check page content for code inspection
+        function updateCodeCheckPage() {
+            const currentRoomName = Object.keys(appState.roomCodes)[appState.currentCodeRoomIndex];
+            const totalRooms = Object.keys(appState.roomCodes).length;
+            const codesInCurrentRoom = appState.roomCodes[currentRoomName] ? appState.roomCodes[currentRoomName].length : 0;
+            const progress = ((appState.currentCodeRoomIndex + 1) / totalRooms) * 100;
+
+            document.getElementById('currentCodeRoomTitle').textContent = `Room: ${currentRoomName}`;
+            document.getElementById('codeProgressInfo').textContent = `Room ${appState.currentCodeRoomIndex + 1} of ${totalRooms} (${codesInCurrentRoom} codes)`;
+            document.getElementById('codeProgressFill').style.width = `${progress}%`;
+
+            document.getElementById('prevCodeRoom').disabled = appState.currentCodeRoomIndex === 0;
+            const nextBtn = document.getElementById('nextCodeRoom');
+            if (appState.currentCodeRoomIndex === totalRooms - 1) {
+                nextBtn.textContent = 'Complete Inspection';
+            } else {
+                nextBtn.textContent = 'Next Room';
+            }
+        }
+
+        // Update check button states for site inspection
+        function updateCheckStates() {
+            const currentRoom = appState.rooms[appState.currentRoomIndex];
+            const roomData = appState.checkData[currentRoom] || new Array(checkLabels.length).fill(null);
+
+            document.querySelectorAll('#checksContainer .check-item').forEach((item) => {
+                const buttons = item.querySelectorAll('.check-btn');
+                const textarea = item.querySelector('textarea[data-check]');
+
+                if (textarea) {
+                    const checkIndex = parseInt(textarea.dataset.check);
+                    textarea.value = roomData[checkIndex] || '';
+                } else {
+                    buttons.forEach(btn => {
+                        const checkIndex = parseInt(btn.dataset.check);
+                        const value = parseInt(btn.dataset.value);
+                        
+                        btn.classList.remove('active');
+                        if (roomData[checkIndex] === value) {
+                            btn.classList.add('active');
+                            item.classList.add('checked');
+                        } else {
+                            item.classList.remove('checked');
+                        }
+                    });
+                }
+            });
+        }
+
+        // Update code check button states and comments for code inspection
+        function updateCodeCheckStates() {
+            const currentRoomName = Object.keys(appState.roomCodes)[appState.currentCodeRoomIndex];
+            const codesForCurrentRoom = appState.roomCodes[currentRoomName] || [];
+
+            codesForCurrentRoom.forEach(code => {
+                const uniqueCodeId = `${currentRoomName}-${code}`;
+                const selectedStatusIndex = appState.checkData[uniqueCodeId];
+                const commentText = appState.codeSpecificComments[uniqueCodeId] || '';
+
+                const statusButton = document.querySelector(`.status-button[data-code-id="${uniqueCodeId}"]`);
+                const commentTextarea = document.querySelector(`.comment-textarea[data-code-id="${uniqueCodeId}"]`);
+
+                if (statusButton) {
+                    if (selectedStatusIndex !== null) {
+                        statusButton.textContent = codeStatusOptions[selectedStatusIndex];
+                        statusButton.classList.add('selected');
+                    } else {
+                        statusButton.textContent = 'Select Status';
+                        statusButton.classList.remove('selected');
+                    }
+                }
+
+                if (commentTextarea) {
+                    commentTextarea.value = commentText;
+                }
+            });
+        }
+
+        // Page navigation functions
+        function showMainMenuPage() {
+            hideAllPages();
+            mainMenuPage.classList.add('active');
+        }
+
+        function showRoomInputPage() {
+            hideAllPages();
+            roomInputPage.classList.add('active');
+        }
+
+        function showCodeInputPage() {
+            hideAllPages();
+            codeInputPage.classList.add('active');
+        }
+
+        function showCheckPage() {
+            hideAllPages();
+            checkPage.classList.add('active');
+        }
+
+        function showCodeCheckPage() {
+            hideAllPages();
+            codeCheckPage.classList.add('active');
+            generateCodeCheckItems(); // Ensure items are generated for the current room
+            updateCodeCheckStates(); // Update states after generation
+        }
+
+        function showCompletionPage() {
+            hideAllPages();
+            completionPage.classList.add('active');
+        }
+
+        function hideAllPages() {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+        }
+
+        // Back navigation functions
+        function backToInput() {
+            appState.isInspectionMode = false;
+            saveDataToStorage();
+            showRoomInputPage();
+        }
+
+        function backToCodeInput() {
+            appState.isInspectionMode = false;
+            saveDataToStorage();
+            showCodeInputPage();
+        }
+
+        // Load saved data functions
+        function loadSavedData() {
+            if (appState.rooms.length === 0) {
+                alert('No saved data found for Site Inspection.');
+                return;
+            }
+            appState.isInspectionMode = true;
+            appState.mode = 'site';
+            generateCheckItems();
+            showCheckPage();
+            updateCheckPage();
+            updateCheckStates();
+        }
+
+        function loadSavedCodeData() {
+            if (Object.keys(appState.roomCodes).length === 0) {
+                alert('No saved data found for Code Inspection.');
+                return;
+            }
+            appState.isInspectionMode = true;
+            appState.mode = 'code';
+            showCodeCheckPage(); // This will call generateCodeCheckItems and updateCodeCheckStates
+        }
+
+        // Export functions
+        function exportToExcel() {
+            const workbook = XLSX.utils.book_new();
+            const worksheetData = [];
+
+            // Header row
+            const headerRow = ['Room', ...checkLabels];
+            worksheetData.push(headerRow);
+
+            // Data rows
+            appState.rooms.forEach(room => {
+                const roomData = appState.checkData[room] || new Array(checkLabels.length).fill(null);
+                const row = [room, ...roomData.map(value => {
+                    if (value === null) return '';
+                    if (typeof value === 'string') return value;
+                    return value === 1 ? 'Yes' : 'No';
+                })];
+                worksheetData.push(row);
+            });
+
+            const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Room Inspection');
+
+            const fileName = `room_inspection_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(workbook, fileName);
+        }
+
+        function exportCodeToExcel() {
+            const workbook = XLSX.utils.book_new();
+            const worksheetData = [];
+
+            // Header row: Room, Code, Status, Comment
+            const headerRow = ['Room', 'Code', 'Status', 'Comment'];
+            worksheetData.push(headerRow);
+
+            // Data rows
+            for (const roomName in appState.roomCodes) {
+                appState.roomCodes[roomName].forEach(code => {
+                    const uniqueCodeId = `${roomName}-${code}`;
+                    const statusIndex = appState.checkData[uniqueCodeId];
+                    const statusText = statusIndex !== null ? codeStatusOptions[statusIndex] : '';
+                    const commentText = appState.codeSpecificComments[uniqueCodeId] || '';
+                    
+                    worksheetData.push([roomName, code, statusText, commentText]);
+                });
+            }
+
+            const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Code Inspection');
+
+            const fileName = `code_inspection_${new Date().toISOString().split('T')[0]}.xlsx`;
+            XLSX.writeFile(workbook, fileName);
+        }
+
+        // Modal functions
+        function showResetModal() {
+            resetModal.classList.add('active');
+        }
+
+        function hideResetModal() {
+            resetModal.classList.remove('active');
+        }
+
+        function resetApplication() {
+            localStorage.removeItem('roomInspectionApp');
+            appState = {
+                mode: 'site',
+                rooms: [],
+                roomCodes: {},
+                currentRoomIndex: 0,
+                currentCodeRoomIndex: 0,
+                checkData: {},
+                codeSpecificComments: {},
+                isInspectionMode: false
+            };
+            hideResetModal();
+            showMainMenuPage();
+        }
+
+        // Storage functions
+        function saveDataToStorage() {
+            localStorage.setItem('roomInspectionApp', JSON.stringify(appState));
+        }
+
+        function loadDataFromStorage() {
+            const saved = localStorage.getItem('roomInspectionApp');
+            if (saved) {
+                const savedState = JSON.parse(saved);
+                // Merge saved state with default appState, ensuring new properties are not lost
+                appState = { ...appState, ...savedState };
+            }
+        }
+
+        // Initialize the app when the page loads
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+
+</body>
+</html>
