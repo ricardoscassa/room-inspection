@@ -625,7 +625,7 @@ Room Codes (Room- Codes)
                     <h2 id="currentRoomTitle" class="room-title">Room 101</h2>
                     <div id="progressInfo" class="progress-info">Room 1 of 5</div>
                     <div class="progress-bar">
-                        <div id="progressFill" class="progress-fill" style="width: 20%"></div>
+                        <div id="progressFill" style="width: 20%"></div>
                     </div>
                 </div>
                 <div id="checksContainer" class="checks-grid">
@@ -635,7 +635,7 @@ Room Codes (Room- Codes)
                     <button id="nextRoom" class="button nav-button">Next Room</button>
                 </div>
                 <div class="action-buttons">
-                    <button id="exportExcel" class="button success">Export to Excel</button>
+                    <button id="exportExcel" class="button success">Export to CSV</button>
                     <button id="backToInput" class="button secondary">Back to Input</button>
                 </div>
             </div>
@@ -648,7 +648,7 @@ Room Codes (Room- Codes)
                     <h2 id="currentCodeRoomTitle" class="room-title">Room: 1HLF0104ZL</h2>
                     <div id="codeProgressInfo" class="progress-info">Room 1 of 5</div>
                     <div class="progress-bar">
-                        <div id="codeProgressFill" class="progress-fill" style="width: 20%"></div>
+                        <div id="codeProgressFill" style="width: 20%"></div>
                     </div>
                 </div>
                 <div id="codeChecksContainer" class="code-inspection-grid">
@@ -663,7 +663,7 @@ Room Codes (Room- Codes)
                     <button id="nextCodeRoom" class="button nav-button">Next Room</button>
                 </div>
                 <div class="action-buttons">
-                    <button id="exportCodeExcel" class="button success">Export to Excel</button>
+                    <button id="exportCodeExcel" class="button success">Export to CSV</button>
                     <button id="backToCodeInput" class="button secondary">Back to Input</button>
                 </div>
             </div>
@@ -677,7 +677,7 @@ Room Codes (Room- Codes)
                     <p>All items have been inspected successfully.</p>
                 </div>
                 <div class="action-buttons">
-                    <button id="exportExcelComplete" class="button success">Export to Excel</button>
+                    <button id="exportExcelComplete" class="button success">Export to CSV</button>
                     <button id="backToMainMenuComplete" class="button secondary">Back to Main Menu</button>
                 </div>
             </div>
@@ -696,7 +696,7 @@ Room Codes (Room- Codes)
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <script>
         // Application State
         let appState = {
@@ -790,28 +790,28 @@ Room Codes (Room- Codes)
 
             // Code Input Page
             document.getElementById('startCodeInspection').addEventListener('click', startCodeInspection);
-            document.getElementById('loadSavedCodeData').addEventListener('click', loadSavedCodeData);
+            document.getElementById('loadSavedCodeData').addEventListener('click', loadSavedData);
             document.getElementById('resetCodeApp').addEventListener('click', showResetModal);
             document.getElementById('backToMainMenuFromCode').addEventListener('click', showMainMenuPage);
 
             // Check Page
             document.getElementById('prevRoom').addEventListener('click', previousRoom);
             document.getElementById('nextRoom').addEventListener('click', nextRoom);
-            document.getElementById('exportExcel').addEventListener('click', exportToExcel);
+            document.getElementById('exportExcel').addEventListener('click', exportToCsv); /* Changed to exportToCsv */
             document.getElementById('backToInput').addEventListener('click', backToInput);
 
             // Code Check Page
             document.getElementById('prevCodeRoom').addEventListener('click', previousCodeRoom);
             document.getElementById('nextCodeRoom').addEventListener('click', nextCodeRoom);
-            document.getElementById('exportCodeExcel').addEventListener('click', exportCodeToExcel);
+            document.getElementById('exportCodeExcel').addEventListener('click', exportCodeToCsv); /* Changed to exportCodeToCsv */
             document.getElementById('backToCodeInput').addEventListener('click', backToCodeInput);
 
             // Completion Page
             document.getElementById('exportExcelComplete').addEventListener('click', () => {
                 if (appState.mode === 'site') {
-                    exportToExcel();
+                    exportToCsv(); /* Changed to exportToCsv */
                 } else {
-                    exportCodeToExcel();
+                    exportCodeToCsv(); /* Changed to exportToCsv */
                 }
             });
             document.getElementById('backToMainMenuComplete').addEventListener('click', showMainMenuPage);
@@ -1103,6 +1103,7 @@ Room Codes (Room- Codes)
                 appState.currentRoomIndex--;
                 updateCheckPage();
                 updateCheckStates();
+                window.scrollTo(0, 0); // Scroll to top
             }
         }
 
@@ -1111,8 +1112,10 @@ Room Codes (Room- Codes)
                 appState.currentRoomIndex++;
                 updateCheckPage();
                 updateCheckStates();
+                window.scrollTo(0, 0); // Scroll to top
             } else {
                 showCompletionPage();
+                window.scrollTo(0, 0); // Scroll to top
             }
         }
 
@@ -1123,6 +1126,7 @@ Room Codes (Room- Codes)
                 generateCodeCheckItems(); // Regenerate items for new room
                 updateCodeCheckPage();
                 updateCodeCheckStates();
+                window.scrollTo(0, 0); // Scroll to top
             }
         }
 
@@ -1132,8 +1136,10 @@ Room Codes (Room- Codes)
                 generateCodeCheckItems(); // Regenerate items for new room
                 updateCodeCheckPage();
                 updateCodeCheckStates();
+                window.scrollTo(0, 0); // Scroll to top
             } else {
                 showCompletionPage();
+                window.scrollTo(0, 0); // Scroll to top
             }
         }
 
@@ -1238,21 +1244,25 @@ Room Codes (Room- Codes)
         function showMainMenuPage() {
             hideAllPages();
             mainMenuPage.classList.add('active');
+            window.scrollTo(0, 0); // Scroll to top
         }
 
         function showRoomInputPage() {
             hideAllPages();
             roomInputPage.classList.add('active');
+            window.scrollTo(0, 0); // Scroll to top
         }
 
         function showCodeInputPage() {
             hideAllPages();
             codeInputPage.classList.add('active');
+            window.scrollTo(0, 0); // Scroll to top
         }
 
         function showCheckPage() {
             hideAllPages();
             checkPage.classList.add('active');
+            window.scrollTo(0, 0); // Scroll to top
         }
 
         function showCodeCheckPage() {
@@ -1260,11 +1270,13 @@ Room Codes (Room- Codes)
             codeCheckPage.classList.add('active');
             generateCodeCheckItems(); // Ensure items are generated for the current room
             updateCodeCheckStates(); // Update states after generation
+            window.scrollTo(0, 0); // Scroll to top
         }
 
         function showCompletionPage() {
             hideAllPages();
             completionPage.classList.add('active');
+            window.scrollTo(0, 0); // Scroll to top
         }
 
         function hideAllPages() {
@@ -1278,12 +1290,14 @@ Room Codes (Room- Codes)
             appState.isInspectionMode = false;
             saveDataToStorage();
             showRoomInputPage();
+            window.scrollTo(0, 0); // Scroll to top
         }
 
         function backToCodeInput() {
             appState.isInspectionMode = false;
             saveDataToStorage();
             showCodeInputPage();
+            window.scrollTo(0, 0); // Scroll to top
         }
 
         // Load saved data functions
@@ -1298,6 +1312,7 @@ Room Codes (Room- Codes)
             showCheckPage();
             updateCheckPage();
             updateCheckStates();
+            window.scrollTo(0, 0); // Scroll to top
         }
 
         function loadSavedCodeData() {
@@ -1308,61 +1323,85 @@ Room Codes (Room- Codes)
             appState.isInspectionMode = true;
             appState.mode = 'code';
             showCodeCheckPage(); // This will call generateCodeCheckItems and updateCodeCheckStates
+            window.scrollTo(0, 0); // Scroll to top
         }
 
-        // Export functions
-        function exportToExcel() {
-            const workbook = XLSX.utils.book_new();
-            const worksheetData = [];
+        /* Replaced original exportToExcel with exportToCsv */
+        function exportToCsv() {
+            try {
+                const headers = ['Room', ...checkLabels];
+                const csvRows = [];
+                // Add headers, ensuring proper CSV escaping
+                csvRows.push(headers.map(h => `"${String(h).replace(/"/g, '""')}"`).join(','));
 
-            // Header row
-            const headerRow = ['Room', ...checkLabels];
-            worksheetData.push(headerRow);
-
-            // Data rows
-            appState.rooms.forEach(room => {
-                const roomData = appState.checkData[room] || new Array(checkLabels.length).fill(null);
-                const row = [room, ...roomData.map(value => {
-                    if (value === null) return '';
-                    if (typeof value === 'string') return value;
-                    return value === 1 ? 'Yes' : 'No';
-                })];
-                worksheetData.push(row);
-            });
-
-            const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'Room Inspection');
-
-            const fileName = `room_inspection_${new Date().toISOString().split('T')[0]}.xlsx`;
-            XLSX.writeFile(workbook, fileName);
-        }
-
-        function exportCodeToExcel() {
-            const workbook = XLSX.utils.book_new();
-            const worksheetData = [];
-
-            // Header row: Room, Code, Status, Comment
-            const headerRow = ['Room', 'Code', 'Status', 'Comment'];
-            worksheetData.push(headerRow);
-
-            // Data rows
-            for (const roomName in appState.roomCodes) {
-                appState.roomCodes[roomName].forEach(code => {
-                    const uniqueCodeId = `${roomName}-${code}`;
-                    const statusIndex = appState.checkData[uniqueCodeId];
-                    const statusText = statusIndex !== null ? codeStatusOptions[statusIndex] : '';
-                    const commentText = appState.codeSpecificComments[uniqueCodeId] || '';
-                    
-                    worksheetData.push([roomName, code, statusText, commentText]);
+                appState.rooms.forEach(room => {
+                    const roomData = appState.checkData[room] || new Array(checkLabels.length).fill(null);
+                    const rowData = [room, ...roomData.map(value => {
+                        if (value === null) return '';
+                        if (typeof value === 'string') return value; // Comments are strings
+                        return value === 1 ? 'Yes' : 'No'; // Yes/No checks
+                    })];
+                    // Add data rows, ensuring proper CSV escaping
+                    csvRows.push(rowData.map(c => `"${String(c).replace(/"/g, '""')}"`).join(','));
                 });
+
+                const csvContent = csvRows.join('\n');
+                downloadCsvFile(csvContent, `room_inspection_${new Date().toISOString().split('T')[0]}.csv`);
+            } catch (error) {
+                console.error('Export failed:', error);
+                alert('Failed to export data. Please try again.');
             }
-
-            const worksheet = XLSX.utils.aoa_to_sheet(worksheetData);
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'Code Inspection');
-
-            const fileName = `code_inspection_${new Date().toISOString().split('T')[0]}.xlsx`;
-            XLSX.writeFile(workbook, fileName);
         }
+
+        /* Replaced original exportCodeToExcel with exportCodeToCsv */
+        function exportCodeToCsv() {
+            try {
+                const headers = ['Room', 'Code', 'Status', 'Comment']; /* Added 'Room' */
+                const csvRows = [];
+                // Add headers, ensuring proper CSV escaping
+                csvRows.push(headers.map(h => `"${String(h).replace(/"/g, '""')}"`).join(','));
+
+                // Iterate through rooms, then their codes to get the room name for each code
+                for (const roomName in appState.roomCodes) {
+                    appState.roomCodes[roomName].forEach(code => {
+                        const uniqueCodeId = `${roomName}-${code}`;
+                        const statusIndex = appState.checkData[uniqueCodeId];
+                        const statusText = statusIndex !== null ? codeStatusOptions[statusIndex] : '';
+                        const commentText = appState.codeSpecificComments[uniqueCodeId] || '';
+                        
+                        const rowData = [roomName, code, statusText, commentText]; // Include roomName
+                        // Add data rows, ensuring proper CSV escaping
+                        csvRows.push(rowData.map(c => `"${String(c).replace(/"/g, '""')}"`).join(','));
+                    });
+                }
+
+                const csvContent = csvRows.join('\n');
+                downloadCsvFile(csvContent, `code_inspection_${new Date().toISOString().split('T')[0]}.csv`);
+            } catch (error) {
+                console.error('Export failed:', error);
+                alert('Failed to export data. Please try again.');
+            }
+        }
+
+        /* New helper function for CSV download */
+        function downloadCsvFile(content, fileName) {
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', fileName);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                alert('Data exported successfully! The file can be opened in Excel or any spreadsheet application.');
+            } else {
+                alert('Your browser does not support file downloads.');
+            }
+        }
+
 
         // Modal functions
         function showResetModal() {
@@ -1403,7 +1442,7 @@ Room Codes (Room- Codes)
             }
         }
 
-        // Initialize the app when the page loads
+        // Initialize the app when DOM is loaded
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 
